@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LiveStream — Real-Time Broadcasting</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- =====================================================================
+       AUTH OVERLAY — shown until the user signs in or registers
+       ===================================================================== -->
+  <div id="auth-overlay" class="auth-overlay" role="dialog" aria-modal="true" aria-label="Sign in">
+
+    <div class="auth-card">
+
+      <header class="auth-header">
+        <div class="logo">
+          <span class="logo-dot" aria-hidden="true"></span>
+          <span class="logo-text">LiveStream</span>
+        </div>
+        <p class="auth-subtitle">Real-time video broadcasting</p>
+      </header>
+
+      <!-- Tab switcher -->
+      <div class="auth-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="login"    role="tab" aria-selected="true"  id="tab-login">Sign In</button>
+        <button class="tab-btn"        data-tab="register" role="tab" aria-selected="false" id="tab-register">Register</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="login-form" class="auth-form active" role="tabpanel" aria-labelledby="tab-login" novalidate>
+        <div class="form-group">
+          <label for="login-username">Username</label>
+          <input type="text" id="login-username" placeholder="Your username"
+                 autocomplete="username" spellcheck="false" required />
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Your password"
+                 autocomplete="current-password" required />
+        </div>
+        <div class="form-group">
+          <label for="login-role">Join as</label>
+          <select id="login-role">
+            <option value="viewer">👁  Viewer — watch &amp; chat</option>
+            <option value="broadcaster">📡  Broadcaster — go live</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="login-submit-btn">
+          Enter Stream
+        </button>
+        <p class="form-error" id="login-error" role="alert" aria-live="assertive"></p>
+      </form>
+
+      <!-- Register form -->
+      <form id="register-form" class="auth-form" role="tabpanel" aria-labelledby="tab-register" novalidate>
+        <div class="form-group">
+          <label for="reg-username">Username <span class="hint">(min 3 chars)</span></label>
+          <input type="text" id="reg-username" placeholder="Choose a username"
+                 autocomplete="username" spellcheck="false" required />
+        </div>
+        <div class="form-group">
+          <label for="reg-password">Password <span class="hint">(min 6 chars)</span></label>
+          <input type="password" id="reg-password" placeholder="Choose a password"
+                 autocomplete="new-password" required />
+        </div>
+        <div class="form-group">
+          <label for="reg-role">Join as</label>
+          <select id="reg-role">
+            <option value="viewer">👁  Viewer — watch &amp; chat</option>
+            <option value="broadcaster">📡  Broadcaster — go live</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="register-submit-btn">
+          Create Account
+        </button>
+        <p class="form-error" id="reg-error" role="alert" aria-live="assertive"></p>
+      </form>
+
+    </div>
+  </div><!-- /auth-overlay -->
+
+
+  <!-- =====================================================================
+       MAIN APPLICATION — hidden until auth succeeds
+       ===================================================================== -->
+  <div id="app" class="app hidden">
+
+    <!-- Top navigation bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <span class="logo-dot live-dot" id="live-dot" aria-hidden="true"></span>
+          <span class="logo-text">LiveStream</span>
+        </div>
+        <span class="stream-status-badge" id="stream-status">No active broadcast</span>
+      </div>
+      <div class="header-right">
+        <span class="user-chip" id="user-chip" aria-label="Logged in as"></span>
+        <button class="btn btn-ghost btn-sm" id="logout-btn">Leave</button>
+      </div>
+    </header>
+
+    <!-- Two-column main layout -->
+    <main class="app-main">
+
+      <!-- ── LEFT / VIDEO COLUMN ────────────────────────────────────────── -->
+      <section class="video-section" aria-label="Video stream">
+
+        <!-- Video player wrapper -->
+        <div class="video-wrapper">
+          <video id="video-player" autoplay playsinline muted
+                 aria-label="Live stream video"></video>
+
+          <!-- Placeholder shown when no stream is active -->
+          <div class="video-overlay" id="video-overlay">
+            <div class="overlay-body">
+              <div class="overlay-icon" aria-hidden="true">📡</div>
+              <p id="overlay-msg">Waiting for broadcast…</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Broadcaster controls (hidden for viewers) ── -->
+        <div class="controls-bar" id="broadcast-controls">
+          <button class="btn btn-live btn-lg" id="start-btn">
+            <span class="btn-dot" aria-hidden="true">●</span>
+            Start Broadcasting
+          </button>
+          <button class="btn btn-ghost btn-lg hidden" id="stop-btn">
+            <span aria-hidden="true">■</span>
+            Stop Broadcast
+          </button>
+          <div class="broadcast-stats hidden" id="broadcast-stats">
+            <span class="stat" id="stat-viewers">0 viewers</span>
+            <span class="stat-sep" aria-hidden="true">·</span>
+            <span class="stat" id="stat-timer" aria-label="Broadcast duration">00:00</span>
+          </div>
+        </div>
+
+        <!-- ── Viewer info bar (hidden for broadcasters) ── -->
+        <div class="controls-bar viewer-bar" id="viewer-bar">
+          <span class="viewer-hint">You are watching live. Use the chat to interact →</span>
+        </div>
+
+      </section><!-- /video-section -->
+
+
+      <!-- ── RIGHT / CHAT COLUMN ────────────────────────────────────────── -->
+      <aside class="chat-section" aria-label="Live chat">
+
+        <header class="chat-header">
+          <h2 class="chat-title">Live Chat</h2>
+          <span class="watching-badge" id="watching-badge" aria-live="polite">0 watching</span>
+        </header>
+
+        <!-- Scrollable message log -->
+        <div class="chat-log" id="chat-box" role="log" aria-live="polite" aria-relevant="additions">
+          <div class="chat-empty">
+            <p>Be the first to say something! 👋</p>
+          </div>
+        </div>
+
+        <!-- Chat input -->
+        <form class="chat-form" id="chat-form" novalidate>
+          <input
+            type="text"
+            id="chat-input"
+            class="chat-input"
+            placeholder="Say something…"
+            maxlength="300"
+            autocomplete="off"
+            spellcheck="true"
+            aria-label="Chat message"
+          />
+          <button type="submit" class="btn btn-primary chat-send-btn">Send</button>
+        </form>
+
+      </aside><!-- /chat-section -->
+
+    </main>
+
+  </div><!-- /app -->
+
+
+  <!-- Socket.IO client (automatically served by the socket.io package) -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- PeerJS — WebRTC abstraction library (CDN) -->
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <!-- Application logic -->
+  <script src="app.js"></script>
+
+</body>
+</html>

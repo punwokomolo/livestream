@@ -1,0 +1,615 @@
+/* ==========================================================================
+   LiveStream Platform — Design System
+   Dark theme, streaming-platform aesthetic
+   ========================================================================== */
+
+:root {
+  /* Colour palette */
+  --bg-0:       #0a0a0a;   /* deepest background      */
+  --bg-1:       #111111;   /* primary surface          */
+  --bg-2:       #1a1a1a;   /* secondary surface        */
+  --bg-3:       #242424;   /* tertiary / input fill    */
+  --bg-4:       #2e2e2e;   /* hover states             */
+  --border:     #2a2a2a;
+  --border-hi:  #3d3d3d;
+
+  /* Text */
+  --txt-1:  #f2f2f2;
+  --txt-2:  #a0a0a0;
+  --txt-3:  #666666;
+
+  /* Brand / accent */
+  --red:        #e53e3e;
+  --red-hover:  #c53030;
+  --red-dim:    rgba(229, 62, 62, 0.12);
+  --live:       #ff4040;
+  --blue-msg:   #1a3a5c;
+  --green:      #48bb78;
+
+  /* Chat username colours (cycled) */
+  --usr-1: #fc8181;
+  --usr-2: #f6ad55;
+  --usr-3: #68d391;
+  --usr-4: #63b3ed;
+  --usr-5: #d6bcfa;
+
+  /* Spacing / shape */
+  --r-sm:  4px;
+  --r:     8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+
+  /* Typography */
+  --font: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Cascadia Code', 'Consolas', monospace;
+
+  /* Transitions */
+  --t-fast: 0.12s ease;
+  --t-med:  0.22s ease;
+}
+
+/* --------------------------------------------------------------------------
+   Reset
+   -------------------------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font);
+  background: var(--bg-0);
+  color: var(--txt-1);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --------------------------------------------------------------------------
+   Utility
+   -------------------------------------------------------------------------- */
+.hidden { display: none !important; }
+
+/* --------------------------------------------------------------------------
+   Logo
+   -------------------------------------------------------------------------- */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  user-select: none;
+}
+
+.logo-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--txt-3);
+  flex-shrink: 0;
+  transition: background var(--t-med), box-shadow var(--t-med);
+}
+
+.logo-dot.active {
+  background: var(--live);
+  box-shadow: 0 0 10px var(--live), 0 0 20px rgba(255, 64, 64, 0.4);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.logo-text {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--txt-1);
+}
+
+/* --------------------------------------------------------------------------
+   Buttons
+   -------------------------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background var(--t-fast), border-color var(--t-fast),
+              color var(--t-fast), transform var(--t-fast), box-shadow var(--t-fast);
+  outline-offset: 3px;
+}
+
+.btn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.btn:focus-visible { outline: 2px solid var(--red); }
+
+.btn-full { width: 100%; }
+.btn-sm   { padding: 0.375rem 0.7rem; font-size: 0.8125rem; }
+.btn-lg   { padding: 0.7rem 1.4rem; font-size: 0.9375rem; }
+
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+}
+.btn-primary:hover:not(:disabled) { background: var(--red-hover); }
+
+.btn-live {
+  background: var(--red);
+  color: #fff;
+  border-color: var(--red);
+}
+.btn-live:hover:not(:disabled) {
+  background: var(--red-hover);
+  box-shadow: 0 0 14px rgba(229, 62, 62, 0.5);
+  transform: scale(1.02);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--txt-2);
+  border-color: var(--border-hi);
+}
+.btn-ghost:hover:not(:disabled) {
+  background: var(--bg-3);
+  color: var(--txt-1);
+  border-color: var(--border-hi);
+}
+
+.btn-dot {
+  font-size: 0.65em;
+  line-height: 1;
+}
+
+/* --------------------------------------------------------------------------
+   Auth Overlay
+   -------------------------------------------------------------------------- */
+.auth-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at 60% 40%, #1a0808 0%, #0a0a0a 70%);
+  z-index: 900;
+  padding: 1rem;
+}
+
+.auth-card {
+  background: var(--bg-2);
+  border: 1px solid var(--border-hi);
+  border-radius: var(--r-xl);
+  padding: 2.25rem 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 32px 64px rgba(0, 0, 0, 0.7);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.auth-subtitle {
+  margin-top: 0.35rem;
+  color: var(--txt-3);
+  font-size: 0.8125rem;
+}
+
+/* Tabs */
+.auth-tabs {
+  display: flex;
+  gap: 3px;
+  background: var(--bg-3);
+  border-radius: var(--r);
+  padding: 3px;
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.45rem;
+  background: transparent;
+  border: none;
+  border-radius: calc(var(--r) - 1px);
+  color: var(--txt-3);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: background var(--t-fast), color var(--t-fast);
+}
+
+.tab-btn.active {
+  background: var(--bg-4);
+  color: var(--txt-1);
+}
+
+.tab-btn:not(.active):hover { color: var(--txt-2); }
+
+/* Forms */
+.auth-form { display: none; flex-direction: column; gap: 0.875rem; }
+.auth-form.active { display: flex; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--txt-2);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.hint { font-weight: 400; color: var(--txt-3); }
+
+.form-group input,
+.form-group select {
+  padding: 0.6rem 0.75rem;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--txt-1);
+  font-size: 0.9375rem;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color var(--t-fast);
+  width: 100%;
+  appearance: auto;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--red);
+}
+
+.form-group select option { background: var(--bg-3); }
+
+.form-error {
+  min-height: 1.1em;
+  font-size: 0.8125rem;
+  color: #fc8181;
+  text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   App Shell
+   -------------------------------------------------------------------------- */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Header
+   -------------------------------------------------------------------------- */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.25rem;
+  height: 52px;
+  background: var(--bg-1);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  gap: 1rem;
+}
+
+.header-left  { display: flex; align-items: center; gap: 0.875rem; min-width: 0; }
+.header-right { display: flex; align-items: center; gap: 0.625rem; flex-shrink: 0; }
+
+.stream-status-badge {
+  font-size: 0.775rem;
+  color: var(--txt-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  white-space: nowrap;
+  transition: color var(--t-med), border-color var(--t-med), background var(--t-med);
+}
+
+.stream-status-badge.live {
+  color: var(--live);
+  border-color: var(--live);
+  background: var(--red-dim);
+}
+
+.user-chip {
+  font-size: 0.775rem;
+  color: var(--txt-2);
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.75rem;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Main layout — CSS Grid (video | chat)
+   -------------------------------------------------------------------------- */
+.app-main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Video Section
+   -------------------------------------------------------------------------- */
+.video-section {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-0);
+  border-right: 1px solid var(--border);
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Video wrapper fills available vertical space */
+.video-wrapper {
+  position: relative;
+  flex: 1;
+  background: #000;
+  overflow: hidden;
+  min-height: 0;
+}
+
+#video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Overlay shown while no stream is playing */
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: opacity var(--t-med);
+}
+
+.video-overlay.hidden { display: none !important; }
+
+.overlay-body { text-align: center; }
+
+.overlay-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+#overlay-msg {
+  font-size: 1.0625rem;
+  color: var(--txt-2);
+}
+
+/* Controls bar (shared by broadcaster + viewer bars) */
+.controls-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  background: var(--bg-1);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.viewer-bar { justify-content: center; }
+
+.viewer-hint {
+  font-size: 0.8125rem;
+  color: var(--txt-3);
+}
+
+/* Broadcast stats (timer + viewer count) */
+.broadcast-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.stat {
+  font-size: 0.8125rem;
+  color: var(--txt-2);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-sep { color: var(--txt-3); }
+
+/* --------------------------------------------------------------------------
+   Chat Section
+   -------------------------------------------------------------------------- */
+.chat-section {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.chat-title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--txt-1);
+}
+
+.watching-badge {
+  font-size: 0.725rem;
+  color: var(--txt-3);
+  background: var(--bg-3);
+  border-radius: 999px;
+  padding: 0.2rem 0.55rem;
+  transition: color var(--t-med);
+}
+
+.watching-badge.live { color: var(--live); }
+
+/* Scrollable message log */
+.chat-log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.625rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.175rem;
+  scroll-behavior: smooth;
+  min-height: 0;
+}
+
+.chat-log::-webkit-scrollbar              { width: 4px; }
+.chat-log::-webkit-scrollbar-track        { background: transparent; }
+.chat-log::-webkit-scrollbar-thumb        { background: var(--border-hi); border-radius: 2px; }
+
+/* Empty-state placeholder */
+.chat-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--txt-3);
+  font-size: 0.8125rem;
+  padding: 2rem 1rem;
+  border: 1px dashed var(--border-hi);
+  border-radius: var(--r);
+  margin: auto 0;
+}
+
+/* Individual chat message */
+.chat-msg {
+  padding: 0.425rem 0.65rem;
+  border-radius: var(--r-sm);
+  background: var(--bg-2);
+  animation: slide-in 0.14s ease-out both;
+  word-break: break-word;
+}
+
+.chat-msg.self { background: var(--blue-msg); }
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.msg-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  margin-bottom: 0.1rem;
+}
+
+.msg-user {
+  font-size: 0.725rem;
+  font-weight: 700;
+  /* colour is set inline per username hash */
+}
+
+.msg-time {
+  font-size: 0.65rem;
+  color: var(--txt-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.msg-text {
+  font-size: 0.875rem;
+  color: var(--txt-1);
+  line-height: 1.45;
+}
+
+/* System / event messages */
+.chat-msg.system {
+  background: transparent;
+  text-align: center;
+  padding: 0.2rem 0;
+}
+
+.msg-text.sys {
+  font-size: 0.75rem;
+  color: var(--txt-3);
+  font-style: italic;
+}
+
+/* Chat input row */
+.chat-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg-1);
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--txt-1);
+  font-size: 0.875rem;
+  font-family: var(--font);
+  outline: none;
+  min-width: 0;
+  transition: border-color var(--t-fast);
+}
+
+.chat-input:focus { border-color: var(--red); }
+.chat-input::placeholder { color: var(--txt-3); }
+
+.chat-send-btn { flex-shrink: 0; }
+
+/* --------------------------------------------------------------------------
+   Responsive — stack vertically on narrow screens
+   -------------------------------------------------------------------------- */
+@media (max-width: 720px) {
+  html, body { overflow: auto; }
+
+  .app-main {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow: auto;
+  }
+
+  .video-section {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .video-wrapper { height: 56vw; min-height: 200px; flex: none; }
+
+  .chat-section { height: 320px; }
+}

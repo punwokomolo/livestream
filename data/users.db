@@ -1,0 +1,4 @@
+{"username":"alice","password":"$2a$10$66gDHGWGGeX/cYzOLEh8/ejjLg7KWzPsDSxmj4g3pOyM0CL7Q5nBK","createdAt":{"$$date":1781337780455},"_id":"ITzuTzR3w0sjUGvU"}
+{"username":"komolo","password":"$2a$10$ANIFEDj1.Sd5.rWH.eTZh.ZpFgDWEGN8639uIVUi0ccMfwTjhn2BC","createdAt":{"$$date":1781338230495},"_id":"QBGggUeL7qlaBRW4"}
+{"username":"punwo","password":"$2a$10$m88tkECD3xcCidumtV7D/uI3BYc1c/aAPNhd.4eY8EApN/obBmFkm","createdAt":{"$$date":1781338184505},"_id":"cmi74cyzoAZWivba"}
+{"$$indexCreated":{"fieldName":"username","unique":true,"sparse":false}}
