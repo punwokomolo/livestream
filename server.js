@@ -3,11 +3,10 @@
 const express    = require('express');
 const http       = require('http');
 const { Server } = require('socket.io');
-const Datastore  = require('nedb');
+const { createClient } = require('@supabase/supabase-js');
 const bcrypt     = require('bcryptjs');
 const jwt        = require('jsonwebtoken');
 const path       = require('path');
-const fs         = require('fs');
 
 // ---------------------------------------------------------------------------
 // Config
@@ -32,16 +31,12 @@ const io = new Server(server, {
 });
 
 // ---------------------------------------------------------------------------
-// NeDB – file-backed user store (pure JS, no native deps)
+// Supabase – hosted Postgres user store
 // ---------------------------------------------------------------------------
-const dataDir = path.join(__dirname, 'data');
-if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
-
-const usersDb = new Datastore({
-  filename: path.join(dataDir, 'users.db'),
-  autoload: true,
-});
-usersDb.ensureIndex({ fieldName: 'username', unique: true });
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
 
 // ---------------------------------------------------------------------------
 // In-memory room state
@@ -75,19 +70,22 @@ app.post('/api/register', async (req, res) => {
 
   try {
     const hash = await bcrypt.hash(password, 10);
+    const { data, error } = await supabase
+      .from('app_users')
+      .insert({ username, password: hash })
+      .select('id, username')
+      .single();
 
-    usersDb.insert({ username, password: hash, createdAt: new Date() }, (err, doc) => {
-      if (err) {
-        if (err.errorType === 'uniqueViolated') {
-          return res.status(409).json({ error: 'That username is already taken.' });
-        }
-        console.error('[DB] insert error:', err);
-        return res.status(500).json({ error: 'Registration failed. Please try again.' });
+    if (error) {
+      if (error.code === '23505') {
+        return res.status(409).json({ error: 'That username is already taken.' });
       }
+      console.error('[DB] insert error:', error);
+      return res.status(500).json({ error: 'Registration failed. Please try again.' });
+    }
 
-      const token = signToken({ userId: doc._id, username: doc.username });
-      return res.json({ token, username: doc.username });
-    });
+    const token = signToken({ userId: data.id, username: data.username });
+    return res.json({ token, username: data.username });
   } catch (err) {
     console.error('[Auth] register error:', err);
     res.status(500).json({ error: 'Server error.' });
@@ -97,7 +95,7 @@ app.post('/api/register', async (req, res) => {
 // ---------------------------------------------------------------------------
 // REST – /api/login
 // ---------------------------------------------------------------------------
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   const username = (req.body?.username ?? '').trim();
   const password = req.body?.password ?? '';
 
@@ -105,23 +103,27 @@ app.post('/api/login', (req, res) => {
     return res.status(400).json({ error: 'Username and password are required.' });
   }
 
-  usersDb.findOne({ username }, async (err, user) => {
-    if (err || !user) {
+  try {
+    const { data: user, error } = await supabase
+      .from('app_users')
+      .select('id, username, password')
+      .eq('username', username)
+      .single();
+
+    if (error || !user) {
       return res.status(401).json({ error: 'Invalid username or password.' });
     }
 
-    try {
-      const valid = await bcrypt.compare(password, user.password);
-      if (!valid) {
-        return res.status(401).json({ error: 'Invalid username or password.' });
-      }
-
-      const token = signToken({ userId: user._id, username: user.username });
-      return res.json({ token, username: user.username });
-    } catch {
-      return res.status(500).json({ error: 'Server error.' });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid username or password.' });
     }
-  });
+
+    const token = signToken({ userId: user.id, username: user.username });
+    return res.json({ token, username: user.username });
+  } catch {
+    return res.status(500).json({ error: 'Server error.' });
+  }
 });
 
 // ---------------------------------------------------------------------------
